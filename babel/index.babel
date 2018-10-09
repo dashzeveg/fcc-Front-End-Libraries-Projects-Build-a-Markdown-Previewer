@@ -1,0 +1,138 @@
+marked.setOptions({
+  breaks: true,
+});
+
+const renderer = new marked.Renderer();
+renderer.link = function (href, title, text) {
+  return `<a target="_blank" href="${href}">${text}` + '</a>';
+}
+
+class Main extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      full1: '',
+      displayNone1: '',
+      full2: '',
+      displayNone2: '',
+      textareaValue: placeholder
+    }
+    this.resizeEditor = this.resizeEditor.bind(this);
+    this.resizePreview = this.resizePreview.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+  }
+  
+  resizeEditor() {
+    if(this.state.full1 == '') {
+      this.setState({full1: 'wrapFull', displayNone2: 'displayNone'})
+    } else {
+      this.setState({full1: '', displayNone2: ''})
+    }
+  }
+  
+  resizePreview() {
+    if(this.state.full2 == '') {
+      this.setState({full2: 'wrapFull', displayNone1: 'displayNone'})
+    } else {
+      this.setState({full2: '', displayNone1: ''})
+    }
+  }
+  
+  handleChange(event) {
+    this.setState({textareaValue: event.target.value});
+    //React.findDOMNode(this.refs.preview).value=this.state.textareaValue;
+    //change();
+    //document.getElementById("preview").innerHTML = marked(this.state.textareaValue);
+  }
+  
+  getMarkdownText() {
+    var rawMarkup = marked('This is _Markdown_.', {sanitize: true});
+    return { __html: rawMarkup };
+  }
+  /*
+  componentDidMount: function () {
+    //let name = React.findDOMNode(this.refs.cpDev1).value;
+  }
+  */
+  render() {
+    return (
+      <div>
+        <div className={`editorWrap ${this.state.full1} ${this.state.displayNone1}`}>
+          <div className="titleBar"><i className="fa fa-free-code-camp"></i> Editor <i className={this.state.full1 == 'wrapFull' ? 'fa fa-compress btnResize' : 'fa fa-arrows-alt btnResize'} onClick={this.resizeEditor}></i></div>
+          <textarea id="editor" className={this.state.full1 && 'textareaHeight'} onChange={this.handleChange}>{this.state.textareaValue}</textarea>
+        </div>
+        
+        <div className={`previewWrap ${this.state.full2} ${this.state.displayNone2}`}>
+          <div className="titleBar"><i className="fa fa-free-code-camp"></i> Previewer <i className={this.state.full2 == 'wrapFull' ? 'fa fa-compress btnResize' : 'fa fa-arrows-alt btnResize'} onClick={this.resizePreview}></i></div>
+          <Preview markdown={this.state.textareaValue}/>
+        </div>
+      </div>
+    );
+  }
+}
+
+const Preview = (props) => {
+  return (
+      <div id='preview' dangerouslySetInnerHTML={{__html: marked(props.markdown, { renderer: renderer })}} />
+    )
+}
+
+class App extends React.Component {
+  render() {
+    return (
+      <div>
+        <Main />
+      </div>
+    );
+  }
+}
+
+const placeholder = 
+`# Welcome to my React Markdown Previewer!
+
+## This is a sub-heading...
+### And here's some other cool stuff:
+  
+Heres some code, \`<div></div>\`, between 2 backticks.
+
+\`\`\`
+// this is multi-line code:
+
+function anotherExample(firstLine, lastLine) {
+  if (firstLine == '\`\`\`' && lastLine == '\`\`\`') {
+    return multiLineCode;
+  }
+}
+\`\`\`
+  
+You can also make text **bold**... whoa!
+Or _italic_.
+Or... wait for it... **_both!_**
+And feel free to go crazy ~~crossing stuff out~~.
+
+There's also [links](https://www.freecodecamp.com), and
+> Block Quotes!
+
+And if you want to get really crazy, even tables:
+
+Wild Header | Crazy Header | Another Header?
+------------ | ------------- | ------------- 
+Your content can | be here, and it | can be here....
+And here. | Okay. | I think we get it.
+
+- And of course there are lists.
+  - Some are bulleted.
+     - With different indentation levels.
+        - That look like this.
+
+
+1. And there are numbererd lists too.
+1. Use just 1s if you want! 
+1. But the list goes on...
+- Even if you use dashes or asterisks.
+* And last but not least, let's not forget embedded images:
+
+![React Logo w/ Text](https://goo.gl/Umyytc)
+`
+
+ReactDOM.render(<App />, document.getElementById('app'));
